@@ -1,5 +1,3 @@
-% Classification using perceptron
-
 %% Reading apple images
 
 A1 = imread('apple_04.jpg');
@@ -66,14 +64,17 @@ metric_P4 = apvalumas_roundness(P4);
 
 %% Create feature vectors for ALL 13 images
 
+
+x1=[hsv_value_A1 hsv_value_A2 hsv_value_A3 hsv_value_P1 hsv_value_P2];
+x2=[metric_A1 metric_A2 metric_A3 metric_P1 metric_P2];
 % Feature 1 - colour
-x1 = [hsv_value_A1 hsv_value_A2 hsv_value_A3 ...
+x3 = [hsv_value_A1 hsv_value_A2 hsv_value_A3 ...
       hsv_value_A4 hsv_value_A5 hsv_value_A6 ...
       hsv_value_A7 hsv_value_A8 hsv_value_A9 ...
       hsv_value_P1 hsv_value_P2 hsv_value_P3 hsv_value_P4];
 
 % Feature 2 - roundness
-x2 = [metric_A1 metric_A2 metric_A3 ...
+x4 = [metric_A1 metric_A2 metric_A3 ...
       metric_A4 metric_A5 metric_A6 ...
       metric_A7 metric_A8 metric_A9 ...
       metric_P1 metric_P2 metric_P3 metric_P4];
@@ -86,9 +87,8 @@ P = [x1; x2];
 % Apples = 1
 % Pears  = -1
 
-T = [1; 1; 1; 1; 1; 1; 1; 1; 1; ...
-    -1; -1; -1; -1];
-
+T = [1; 1; 1; 1; 1; 1; 1; 1; 1; -1; -1; -1; -1];
+T1 = [1; 1; 1; -1; -1];
 %% Generate random initial values
 
 w1 = randn(1);
@@ -110,7 +110,7 @@ while e ~= 0
 
     %% TRAIN
 
-    for n = 1:13
+    for n = 1:5
 
         % Weighted sum
         v = x1(n)*w1 + x2(n)*w2 + b;
@@ -123,11 +123,11 @@ while e ~= 0
         end
 
         % Instantaneous error
-        e_n = T(n) - y;
+        e_n = T1(n) - y;
 
         % Display training information
         fprintf('Training: object %d, desired = %d, output = %d, error = %d\n', ...
-                n, T(n), y, e_n);
+                n, T1(n), y, e_n);
 
         % Update parameters
         w1 = w1 + eta*e_n*x1(n);
@@ -145,7 +145,7 @@ while e ~= 0
     for n = 1:13
 
         % Weighted sum
-        v = x1(n)*w1 + x2(n)*w2 + b;
+        v = x3(n)*w1 + x4(n)*w2 + b;
 
         % Perceptron output
         if v > 0
