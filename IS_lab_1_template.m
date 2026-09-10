@@ -22,6 +22,7 @@ P4 = imread('pear_09.jpg');
 % x2 = roundness
 
 % Apples
+
 hsv_value_A1 = spalva_color(A1);
 metric_A1 = apvalumas_roundness(A1);
 
@@ -50,6 +51,7 @@ hsv_value_A9 = spalva_color(A9);
 metric_A9 = apvalumas_roundness(A9);
 
 % Pears
+
 hsv_value_P1 = spalva_color(P1);
 metric_P1 = apvalumas_roundness(P1);
 
@@ -62,33 +64,43 @@ metric_P3 = apvalumas_roundness(P3);
 hsv_value_P4 = spalva_color(P4);
 metric_P4 = apvalumas_roundness(P4);
 
-%% Create feature vectors for ALL 13 images
+%% TRAINING DATA
+% First 5 objects are used for training
+% A1, A2, A3 = apples
+% P1, P2 = pears
 
-
-x1=[hsv_value_A1 hsv_value_A2 hsv_value_A3 hsv_value_P1 hsv_value_P2];
-x2=[metric_A1 metric_A2 metric_A3 metric_P1 metric_P2];
 % Feature 1 - colour
-x3 = [hsv_value_A1 hsv_value_A2 hsv_value_A3 ...
-      hsv_value_A4 hsv_value_A5 hsv_value_A6 ...
-      hsv_value_A7 hsv_value_A8 hsv_value_A9 ...
-      hsv_value_P1 hsv_value_P2 hsv_value_P3 hsv_value_P4];
+x1 = [hsv_value_A1 hsv_value_A2 hsv_value_A3 ...
+      hsv_value_P1 hsv_value_P2];
 
 % Feature 2 - roundness
-x4 = [metric_A1 metric_A2 metric_A3 ...
-      metric_A4 metric_A5 metric_A6 ...
-      metric_A7 metric_A8 metric_A9 ...
-      metric_P1 metric_P2 metric_P3 metric_P4];
+x2 = [metric_A1 metric_A2 metric_A3 ...
+      metric_P1 metric_P2];
 
-% Feature matrix
-P = [x1; x2];
-
-%% Desired output
-
+% Desired output for training
 % Apples = 1
-% Pears  = -1
+% Pears = -1
 
-T = [1; 1; 1; 1; 1; 1; 1; 1; 1; -1; -1; -1; -1];
-T1 = [1; 1; 1; -1; -1];
+T1 = [1 1 1 -1 -1];
+
+%% TESTING DATA
+% Remaining 8 objects are used only for testing
+% A4-A9 = apples
+% P3-P4 = pears
+
+% Feature 1 - colour
+x3 = [hsv_value_A4 hsv_value_A5 hsv_value_A6 ...
+      hsv_value_A7 hsv_value_A8 hsv_value_A9 ...
+      hsv_value_P3 hsv_value_P4];
+
+% Feature 2 - roundness
+x4 = [metric_A4 metric_A5 metric_A6 ...
+      metric_A7 metric_A8 metric_A9 ...
+      metric_P3 metric_P4];
+
+% Desired output for testing
+T = [1 1 1 1 1 1 -1 -1];
+
 %% Generate random initial values
 
 w1 = randn(1);
@@ -140,9 +152,9 @@ while e ~= 0
 
     e = 0;
 
-    fprintf('\n--- TEST ---\n');
+    fprintf('\n--- TESTING REMAINING OBJECTS ---\n');
 
-    for n = 1:13
+    for n = 1:8
 
         % Weighted sum
         v = x3(n)*w1 + x4(n)*w2 + b;
@@ -166,7 +178,7 @@ while e ~= 0
 
     end
 
-    fprintf('TOTAL ERROR = %d\n', e);
+    fprintf('TOTAL TEST ERROR = %d\n', e);
 
 end
 
@@ -180,3 +192,25 @@ disp('==============================');
 disp(['w1 = ', num2str(w1)]);
 disp(['w2 = ', num2str(w2)]);
 disp(['b  = ', num2str(b)]);
+
+%% Final testing
+
+disp(' ');
+disp('==============================');
+disp('FINAL TESTING');
+disp('==============================');
+
+for n = 1:8
+
+    v = x3(n)*w1 + x4(n)*w2 + b;
+
+    if v > 0
+        y = 1;
+    else
+        y = -1;
+    end
+
+    fprintf('Test object %d: desired = %d, output = %d\n', ...
+            n, T(n), y);
+
+end
